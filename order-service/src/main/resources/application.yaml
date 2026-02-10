@@ -1,0 +1,154 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: order-service
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    admin:
+      auto-create: true   # allows NewTopic beans to create topics
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all           # safest (banking mindset)
+      retries: 3
+
+    consumer:
+      group-id: order-group   # change per service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+  jackson:
+    time-zone: UTC
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/userdb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
+  sql:
+    init:
+      mode: never
+
+  cloud:
+    config:
+      enabled: false
+
+# ===============================
+# Eureka
+# ===============================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+# ===============================
+# Logging
+# ===============================
+#logging:
+  #level:
+    #org.hibernate.SQL: debug
+    #org.hibernate.type.descriptor.sql: trace
+    #io.github.resilience4j: debug
+
+# ===============================
+# Feign (REAL timeout here)
+# ===============================
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 3000
+
+# ===============================
+# Resilience4j
+# ===============================
+resilience4j:
+
+  circuitbreaker:
+    instances:
+
+      userService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+      productService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+      inventoryService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+      paymentService:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 15s
+
+  retry:
+    instances:
+
+      userService:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - feign.RetryableException
+          - java.net.SocketTimeoutException
+
+      productService:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - feign.RetryableException
+          - java.net.SocketTimeoutException
+
+      inventoryService:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - feign.RetryableException
+          - java.net.SocketTimeoutException
+
+      paymentService:
+        max-attempts: 2
+        wait-duration: 1s
+        retry-exceptions:
+          - feign.RetryableException
+          - java.net.SocketTimeoutException
+
+logging:
+  level:
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
