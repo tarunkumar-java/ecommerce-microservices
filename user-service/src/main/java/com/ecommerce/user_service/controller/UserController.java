@@ -53,5 +53,10 @@ public class UserController {
          return ResponseEntity.ok(apiResponse);
 
     }
+
+    @GetMapping
+    public ApiResponse<String> getUserName(){
+        return ApiResponse.success("Hello from user service",null);
+    }
 }
 
