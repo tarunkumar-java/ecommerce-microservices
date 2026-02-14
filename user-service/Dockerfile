@@ -5,10 +5,10 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Copy the compiled Java application JAR file into the container
-COPY ./target/user-service.jar /app
+COPY target/*.jar app.jar
 
 # Expose the port the Spring Boot application will run on
 EXPOSE 8081
 
 # Command to run the application
-CMD ["java", "-jar", "user-service.jar"]
+CMD ["java", "-jar", "app.jar"]

@@ -26,7 +26,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building Docker image
-      - docker build -t $REPOSITORY_URI:latest .
+      - docker build -t $REPOSITORY_URI:latest user-service
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
 
   post_build:
@@ -43,5 +43,5 @@ phases:
 
 artifacts:
   files:
-    - imagedefinitions.json
-    - target/user-service.jar
+    - user-service/imagedefinitions.json
+    - user-service/target/*.jar
