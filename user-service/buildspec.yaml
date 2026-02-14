@@ -3,8 +3,11 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Entering user-service directory
-      - cd user-service
+      - cd common-lib
+      - mvn clean install -DskipTests
+
+      - cd ../user-service
+      - mvn clean install -DskipTests
 
       - echo Running Maven build
       - mvn clean install -DskipTests
